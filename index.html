@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Crypto Signals | Mobile</title>
+  <style>
+    :root {
+      --bg: #0a0c10; --card: #12151c; --text: #e8eaed;
+      --muted: #9ca3af; --green: #22c55e; --red: #ef4444;
+      --yellow: #f59e0b; --border: #2a2f3a;
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; padding: calc(1rem + var(--safe-top)) 1rem calc(1rem + var(--safe-bottom)); touch-action: manipulation; }
+    header { text-align: center; margin-bottom: 1.5rem; }
+    h1 { font-size: clamp(1.4rem, 5vw, 1.8rem); font-weight: 700; margin-bottom: 0.3rem; }
+    .subtitle { color: var(--muted); font-size: 0.85rem; }
+    .grid { display: grid; gap: 1rem; max-width: 600px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .asset-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+    .asset-name { font-weight: 600; font-size: 1.1rem; }
+    .price { font-size: clamp(1.2rem, 4vw, 1.5rem); font-weight: 700; }
+    .metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem; margin: 0.8rem 0; }
+    .metric { background: #1a1e28; padding: 0.7rem 0.5rem; border-radius: 10px; text-align: center; }
+    .metric-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .metric-value { font-size: 0.95rem; margin-top: 0.2rem; font-weight: 500; }
+    .signal { text-align: center; padding: 0.9rem; border-radius: 12px; margin-top: 0.8rem; font-weight: 700; font-size: 1rem; letter-spacing: 0.5px; }
+    .signal.buy { background: rgba(34, 197, 94, 0.15); color: var(--green); border: 1px solid var(--green); }
+    .signal.sell { background: rgba(239, 68, 68, 0.15); color: var(--red); border: 1px solid var(--red); }
+    .signal.neutral { background: rgba(156, 163, 175, 0.15); color: var(--muted); border: 1px solid var(--muted); }
+    .controls { text-align: center; margin-top: 1.5rem; padding-bottom: env(safe-area-inset-bottom); }
+    button { background: var(--border); color: var(--text); border: none; padding: 0.9rem 1.5rem; border-radius: 12px; cursor: pointer; font-size: 1rem; font-weight: 500; width: 100%; max-width: 300px; margin: 0 auto; display: block; touch-action: manipulation; min-height: 48px; }
+    button:active { transform: scale(0.98); background: #3a3f4b; }
+    .status-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 0.8rem; color: var(--muted); font-size: 0.8rem; padding: 0 0.5rem; }
+    .disclaimer { text-align: center; color: var(--muted); font-size: 0.75rem; margin-top: 2rem; line-height: 1.4; padding-bottom: 1rem; }
+    .error { color: var(--red); text-align: center; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 12px; margin-top: 1rem; display: none; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .loading { opacity: 0.7; pointer-events: none; }
+    @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📊 Crypto Signals</h1>
+    <p class="subtitle">BTC & ETH • 1H Timeframe • Auto-updates</p>
+  </header>
+  <main class="grid">    <div class="card" id="btc-card">
+      <div class="asset-header">
+        <span class="asset-name">Bitcoin</span>
+        <span class="price" id="btc-price">Loading...</span>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">RSI (14)</div><div class="metric-value" id="btc-rsi">--</div></div>
+        <div class="metric"><div class="metric-label">Trend</div><div class="metric-value" id="btc-trend">--</div></div>
+        <div class="metric"><div class="metric-label">Volume</div><div class="metric-value" id="btc-vol">--</div></div>
+        <div class="metric"><div class="metric-label">Updated</div><div class="metric-value" id="btc-time">--</div></div>
+      </div>
+      <div class="signal neutral" id="btc-signal">NEUTRAL</div>
+    </div>
+    <div class="card" id="eth-card">
+      <div class="asset-header">
+        <span class="asset-name">Ethereum</span>
+        <span class="price" id="eth-price">Loading...</span>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">RSI (14)</div><div class="metric-value" id="eth-rsi">--</div></div>
+        <div class="metric"><div class="metric-label">Trend</div><div class="metric-value" id="eth-trend">--</div></div>
+        <div class="metric"><div class="metric-label">Volume</div><div class="metric-value" id="eth-vol">--</div></div>
+        <div class="metric"><div class="metric-label">Updated</div><div class="metric-value" id="eth-time">--</div></div>
+      </div>
+      <div class="signal neutral" id="eth-signal">NEUTRAL</div>
+    </div>
+  </main>
+  <div class="error" id="error-msg"></div>
+  <div class="controls">
+    <button id="refresh-btn" onclick="fetchSignals()">🔄 Refresh Signals</button>
+    <div class="status-bar">
+      <span id="status">Next update in 60s</span>
+      <span id="connection-status">● Online</span>
+    </div>
+  </div>
+  <p class="disclaimer">⚠️ Educational tool only. Not financial advice. Crypto trading carries high risk. Signals are rule-based observations. Always DYOR.</p>
+  <script>
+    const CONFIG = { interval: '1h', limit: 100, refreshMs: 60000, rsiPeriod: 14, smaPeriod: 50, volPeriod: 20, volMultiplier: 1.5 };
+    const fmt = (n, d=2) => Number(n).toFixed(d);
+    const fmtPrice = (n) => `$${Number(n).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    function calculateRSI(closes, period = CONFIG.rsiPeriod) {
+      if (closes.length < period + 1) return 50;
+      let gains = 0, losses = 0;
+      for (let i = 1; i <= period; i++) { const diff = closes[i] - closes[i-1]; diff >= 0 ? gains += diff : losses -= diff; }
+      let avgGain = gains / period, avgLoss = losses / period;
+      for (let i = period + 1; i < closes.length; i++) {
+        const diff = closes[i] - closes[i-1];
+        avgGain = (avgGain * (period - 1) + (diff > 0 ? diff : 0)) / period;
+        avgLoss = (avgLoss * (period - 1) + (diff < 0 ? -diff : 0)) / period;
+      }      const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+      return 100 - (100 / (1 + rs));
+    }
+    function calculateSMA(arr, period) { return arr.slice(-period).reduce((a, b) => a + b, 0) / period; }
+    async function fetchKlines(symbol) {
+      const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${CONFIG.interval}&limit=${CONFIG.limit}`);
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      return await res.json();
+    }
+    function analyzeData(klines) {
+      const closes = klines.map(k => parseFloat(k[4]));
+      const volumes = klines.map(k => parseFloat(k[5]));
+      return {
+        price: closes[closes.length - 1],
+        rsi: calculateRSI(closes),
+        sma50: calculateSMA(closes, CONFIG.smaPeriod),
+        vol: volumes[volumes.length - 1],
+        volMA: calculateSMA(volumes, CONFIG.volPeriod),
+        trend: closes[closes.length - 1] > calculateSMA(closes, CONFIG.smaPeriod) ? 'UPTREND' : 'DOWNTREND'
+      };
+    }
+    function generateSignal(d) {
+      if (d.trend === 'UPTREND' && d.rsi < 45 && d.rsi > 30 && d.vol > d.volMA * CONFIG.volMultiplier) return 'BUY';
+      if (d.trend === 'DOWNTREND' && d.rsi > 55 && d.rsi < 70 && d.vol > d.volMA * CONFIG.volMultiplier) return 'SELL';
+      return 'NEUTRAL';
+    }
+    function updateUI(prefix, d, signal) {
+      document.getElementById(`${prefix}-price`).textContent = fmtPrice(d.price);
+      document.getElementById(`${prefix}-rsi`).textContent = fmt(d.rsi);
+      document.getElementById(`${prefix}-trend`).textContent = d.trend === 'UPTREND' ? '📈 Bullish' : '📉 Bearish';
+      document.getElementById(`${prefix}-vol`).textContent = `${(d.vol / d.volMA).toFixed(1)}x`;
+      document.getElementById(`${prefix}-time`).textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      const el = document.getElementById(`${prefix}-signal`);
+      el.textContent = signal;
+      el.className = `signal ${signal.toLowerCase()}`;
+    }
+    async function fetchSignals() {
+      const btn = document.getElementById('refresh-btn');
+      const errEl = document.getElementById('error-msg');
+      errEl.style.display = 'none';
+      btn.textContent = '⏳ Updating...';
+      document.body.classList.add('loading');
+      try {
+        const [btcK, ethK] = await Promise.all([fetchKlines('BTCUSDT'), fetchKlines('ETHUSDT')]);
+        const btcData = analyzeData(btcK);
+        const ethData = analyzeData(ethK);
+        updateUI('btc', btcData, generateSignal(btcData));
+        updateUI('eth', ethData, generateSignal(ethData));
+      } catch (e) {
+        errEl.textContent = `⚠️ Failed: ${e.message}. Check connection.`;        errEl.style.display = 'block';
+      } finally {
+        btn.textContent = '🔄 Refresh Signals';
+        document.body.classList.remove('loading');
+      }
+    }
+    let countdown = CONFIG.refreshMs / 1000;
+    setInterval(() => { countdown--; document.getElementById('status').textContent = `Next update in ${countdown}s`; if (countdown <= 0) { fetchSignals(); countdown = CONFIG.refreshMs / 1000; }}, 1000);
+    window.addEventListener('online', () => document.getElementById('connection-status').innerHTML = '● Online');
+    window.addEventListener('offline', () => document.getElementById('connection-status').innerHTML = '● Offline');
+    fetchSignals();
+  </script>
+</body>
+</html>
